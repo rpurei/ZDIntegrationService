@@ -13,10 +13,13 @@ import fitz
 def add_doc_header_picture(doc_name: str, picture_name: str):
     try:
         document = Document(doc_name)
-        header = document.sections[0].header
+        sections = document.sections
+        sections[0].different_first_page_header_footer = True
+        header = sections[0].first_page_header
         header_paragraph = header.paragraphs[0]
         header_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
-        header_run = header_paragraph.add_run()
+        header_run = header_paragraph.runs[-1].clear()
+        header_run = header_paragraph.runs[0].clear()
         header_run.add_picture(FileIO(picture_name, 'rb'), width=Cm(DOC_QR_SIZE))
         document.save(doc_name)
     except Exception as err:
