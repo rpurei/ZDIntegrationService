@@ -1,0 +1,15 @@
+[Unit]
+Description=IntService
+After=network.target
+
+[Service]
+User=www-data
+WorkingDirectory=/var/www/ZDIntegrationService
+LimitNOFILE=4096
+ExecStart=/var/www/ZDIntegrationService/server_start.sh
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+
