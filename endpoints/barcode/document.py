@@ -18,8 +18,11 @@ def add_doc_header_picture(doc_name: str, picture_name: str):
         header = sections[0].first_page_header
         header_paragraph = header.paragraphs[0]
         header_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
-        #header_run = header_paragraph.runs[-1].clear()
-        header_run = header_paragraph.runs[0].clear()
+        if len(header_paragraph.runs) > 0:
+            header_run = header_paragraph.runs[-1].clear()
+            header_run = header_paragraph.runs[0].clear()
+        else:
+            header_run = header_paragraph.add_run()
         header_run.add_picture(FileIO(picture_name, 'rb'), width=Cm(DOC_QR_SIZE))
         document.save(doc_name)
     except Exception as err:
@@ -43,5 +46,5 @@ def add_pdf_header_picture(doc_name: str, picture_name: str):
 
 if __name__ == "__main__":
     pass
-    #add_doc_header_picture('test.docx', 'test.png')
+    #add_doc_header_picture('test2.docx', 'test.png')
     #add_pdf_header_picture('', '')
