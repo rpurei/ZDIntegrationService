@@ -3,6 +3,7 @@ from config import (DIRECTUM_API_USER, DIRECTUM_API_PASSWORD, DIRECTUM_PROTOCOL,
                     DIRECTUM_ATTACH_SET_URL)
 import requests
 import base64
+import json
 
 headers = {'Username': DIRECTUM_API_USER,
            'Password': DIRECTUM_API_PASSWORD,
@@ -37,10 +38,10 @@ def doc_send_directum(doc_id: int, doc_string: str, doc_extension: str):
                         }
     try:
         logger.info(f'Request URL: {set_attachment_version_uri}')
-        logger.info(f'Request payload: {payload_directum}')
-        logger.info(f'Request headers: {doc_extension}')
+        logger.info(f'Request payload: {json.dumps(payload_directum)}')
+        logger.info(f'Request headers: {headers}')
         response_directum_add_ver = requests.post(set_attachment_version_uri,
-                                                  data=payload_directum,
+                                                  data=json.dumps(payload_directum),
                                                   headers=headers)
 
     except Exception as err:
