@@ -3,6 +3,7 @@ from config import API_KEY, TEMP_NAME_LENGTH, TEMP_DIR
 from .models import Document, DocumentResponse
 from .barcode import make_qr
 from .document import add_doc_header_picture, add_pdf_header_picture
+from .utils import doc_to_base64, doc_send_directum
 from fastapi import APIRouter, status, HTTPException
 from pathlib import Path
 import random
@@ -40,12 +41,15 @@ async def add_category(input_document: Document):
         temp_qr_file = make_qr(input_document.doc_qr_text)
         if temp_qr_file == '':
             raise ValueError()
-        if input_document.doc_ext.startswith('doc'):
-            add_doc_header_picture(str(temp_full_name), temp_qr_file)
-        elif input_document.doc_ext.startswith('pdf'):
-            add_pdf_header_picture(str(temp_full_name), temp_qr_file)
+        if input_document.doc_ext.startswith('doc') or input_document.doc_ext.startswith('pdf'):
+            if add_doc_header_picture(str(temp_full_name), temp_qr_file) == -1:
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                                    detail=f'Unsupported document type')
         else:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'Unsupported document type')
+        doc_base64 = doc_to_base64(str(temp_full_name))
+        if len(doc_base64) > 0:
+            doc_send_directum(input_document.doc_id, doc_base64, input_document.doc_ext)
     except Exception as err:
         lf = '\n'
         logger.error(f'{traceback.format_exc().replace(lf, "")}')

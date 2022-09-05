@@ -25,9 +25,11 @@ def add_doc_header_picture(doc_name: str, picture_name: str):
             header_run = header_paragraph.add_run()
         header_run.add_picture(FileIO(picture_name, 'rb'), width=Cm(DOC_QR_SIZE))
         document.save(doc_name)
+        return 0
     except Exception as err:
         lf = '\n'
         logger.error(f'{traceback.format_exc().replace(lf, "")}')
+        return -1
 
 
 def add_pdf_header_picture(doc_name: str, picture_name: str):
@@ -39,9 +41,11 @@ def add_pdf_header_picture(doc_name: str, picture_name: str):
         rect = fitz.Rect(page.rect.width - PDF_QR_SIZE * 2, PDF_QR_SIZE, page.rect.width - PDF_QR_SIZE, PDF_QR_SIZE * 2)
         page.insert_image(rect, stream=img, xref=img_xref)
         doc.saveIncr()
+        return 0
     except Exception as err:
         lf = '\n'
         logger.error(f'{traceback.format_exc().replace(lf, "")}')
+        return -1
 
 
 if __name__ == "__main__":
