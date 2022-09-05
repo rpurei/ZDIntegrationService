@@ -18,7 +18,7 @@ def add_doc_header_picture(doc_name: str, picture_name: str):
         header = sections[0].first_page_header
         header_paragraph = header.paragraphs[0]
         header_paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
-        header_run = header_paragraph.runs[-1].clear()
+        #header_run = header_paragraph.runs[-1].clear()
         header_run = header_paragraph.runs[0].clear()
         header_run.add_picture(FileIO(picture_name, 'rb'), width=Cm(DOC_QR_SIZE))
         document.save(doc_name)
