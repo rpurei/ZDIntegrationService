@@ -53,11 +53,13 @@ async def add_category(input_document: Document):
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'Unsupported document type')
         doc_base64 = doc_to_base64(str(temp_full_name))
         if len(doc_base64) > 0:
-            doc_send_directum(input_document.doc_id, doc_base64, input_document.doc_ext)
+            return {'detail': 'QR_INSERTED',
+                    'doc_content': doc_base64,
+                    'doc_ext': input_document.doc_ext}
     except Exception as err:
         lf = '\n'
         logger.error(f'{traceback.format_exc().replace(lf, "")}')
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'{traceback.format_exc()}')
     finally:
         Path(temp_qr_file).unlink()
-        return {'detail': 'QR_INSERTED'}
+

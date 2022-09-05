@@ -11,3 +11,5 @@ class Document(BaseModel):
 
 class DocumentResponse(BaseModel):
     detail: str
+    doc_content: str
+    doc_ext: str
