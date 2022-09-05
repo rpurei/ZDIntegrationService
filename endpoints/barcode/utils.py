@@ -21,7 +21,7 @@ set_attachment_version_uri = (DIRECTUM_PROTOCOL +
 def doc_to_base64(file_name: str):
     encoded_string = ''
     try:
-        with open('yourfile.ext', 'rb') as image_file:
+        with open(file_name, 'rb') as image_file:
             encoded_string = base64.b64encode(image_file.read())
     except Exception as err:
         logger.error(f'For file:"{file_name}" error "{str(err)}" occured!!!')
