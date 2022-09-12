@@ -1,9 +1,10 @@
 from app_logger import logger
-from .models import ConturAPIGet
+from typing import Union
 from config import CONTUR_FOCUS_API_URL, CONTUR_FOCUS_API_VER, CONTUR_FOCUS_API_KEY, API_KEY
 from fastapi import APIRouter, status, HTTPException
 import requests
 import traceback
+import json
 
 
 router = APIRouter(
@@ -14,7 +15,10 @@ router = APIRouter(
 
 
 @router.get('/')
-async def counterparty_check(input_data: ConturAPIGet):
+async def counterparty_check(api_key: str,
+                             inn: Union[str, None] = None,
+                             ogrn: Union[str, None] = None,
+                             xml: bool = False):
     apikey_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='API key not valid'
@@ -23,11 +27,47 @@ async def counterparty_check(input_data: ConturAPIGet):
         status_code=status.HTTP_400_BAD_REQUEST,
         detail='Request parameters not valid'
     )
-    if input_data.api_key != API_KEY:
-        logger.error(f'Error accessing API with: {str(input_data)}')
+    if api_key != API_KEY:
+        logger.error(f'Error accessing API with: {api_key}')
         raise apikey_exception
+    if not inn and not ogrn:
+        logger.error(f'Both INN and OGRN empty')
+        raise badparams_exception
     try:
-        pass
+        params = {
+            'key': CONTUR_FOCUS_API_KEY
+        }
+        if inn:
+            params['inn'] = inn
+        if ogrn:
+            params['ogrn'] = ogrn
+        api_function_list = ['/req', '/contacts', '/sites', '/egrDetails', '/analytics']
+        result_report = {
+            'BasicReport': {'Информация': '',
+                            'Телефоны': '',
+                            'Сайты': ''},
+            'ExtendedReport_1': '',
+            'ExtendedReport_2': '',
+            'SimpleReportPDF': '',
+            'FinReportPDF': ''
+        }
+        for api_index, api_function in enumerate(api_function_list):
+            final_url = CONTUR_FOCUS_API_URL + CONTUR_FOCUS_API_VER + api_function
+            response_contur_api = requests.get(final_url, params=params)
+            if response_contur_api.status_code == 200:
+                if api_index == 0:
+                    result_report['BasicReport']['Информация'] = response_contur_api.json()[0]['UL']
+                if api_index == 1:
+                    result_report['BasicReport']['Телефоны'] = response_contur_api.json()[0]['contactPhones']['phones']
+                if api_index == 2:
+                    result_report['BasicReport']['Сайты'] = response_contur_api.json()[0]['sites']
+                if api_index == 3:
+                    result_report['ExtendedReport_1'] = response_contur_api.json()[0]
+                if api_index == 4:
+                    result_report['ExtendedReport_2'] = response_contur_api.json()[0]
+            else:
+                logger.error(f'Error getting ConturAPI request: {response_contur_api.status_code} - {response_contur_api.headers}')
+        return result_report
     except Exception as err:
         lf = '\n'
         logger.error(f'{traceback.format_exc().replace(lf, "")} : {str(err)}')
@@ -35,14 +75,4 @@ async def counterparty_check(input_data: ConturAPIGet):
 
 
 if __name__ == '__main__':
-    API_FUNCTION = '/req'
-    final_url = CONTUR_FOCUS_API_URL + CONTUR_FOCUS_API_VER + API_FUNCTION
-    params = {
-                'key': CONTUR_FOCUS_API_KEY,
-                'inn': '3123169789'
-             }
-    response_contur_api = requests.get(final_url, params=params)
-    if response_contur_api.status_code == 200:
-        print(response_contur_api.json())
-    else:
-        logger.error(f'Error getting ConturAPI request: {response_contur_api.status_code} - {response_contur_api.headers}')
+    pass

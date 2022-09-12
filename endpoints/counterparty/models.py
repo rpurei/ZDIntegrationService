@@ -9,7 +9,7 @@ class ConturAPIGet(BaseModel):
     xml: bool = False
 
     @validator('ogrn')
-    def check_a_or_b(cls, v, values):
+    def check_inn_or_ogrn(cls, v, values):
         if 'inn' not in values and not values['ogrn']:
             raise ValueError('either a or b is required')
         return values['ogrn']
