@@ -59,22 +59,27 @@ async def counterparty_check(api_key: str,
             if api_index == 6:
                 del params['pdf']
             response_contur_api = requests.get(final_url, params=params)
+            json_result = {}
             if response_contur_api.status_code == 200:
-                json_result = response_contur_api.json()[0]
-                if api_index == 0:
-                    result_report['BasicReport']['Информация'] = json_result.get('UL')
-                if api_index == 1:
-                    result_report['BasicReport']['Телефоны'] = json_result.get('contactPhones').get('phones')
-                if api_index == 2:
-                    result_report['BasicReport']['Сайты'] = json_result.get('sites')
-                if api_index == 3:
-                    result_report['ExtendedReport_1'] = json_result
-                if api_index == 4:
-                    result_report['ExtendedReport_2'] = json_result
-                if api_index == 5:
-                    result_report['BasicPDFReport'] = base64.b64encode(response_contur_api.content)
-                if api_index == 6:
-                    result_report['FinPDFReport'] = base64.b64encode(response_contur_api.content)
+                try:
+                    if api_index != 5 and api_index != 6 and response_contur_api.headers['content-type'].strip().startswith('application/json'):
+                        json_result = response_contur_api.json()[0]
+                    if api_index == 0:
+                        result_report['BasicReport']['Информация'] = json_result.get('UL')
+                    if api_index == 1:
+                        result_report['BasicReport']['Телефоны'] = json_result.get('contactPhones').get('phones')
+                    if api_index == 2:
+                        result_report['BasicReport']['Сайты'] = json_result.get('sites')
+                    if api_index == 3:
+                        result_report['ExtendedReport_1'] = json_result
+                    if api_index == 4:
+                        result_report['ExtendedReport_2'] = json_result
+                    if api_index == 5:
+                        result_report['BasicPDFReport'] = base64.b64encode(response_contur_api.content)
+                    if api_index == 6:
+                        result_report['FinPDFReport'] = base64.b64encode(response_contur_api.content)
+                except (ValueError, json.JSONDecodeError) as err:
+                    logger.error(f'Error getting ConturAPI data: {json_result} status code: {response_contur_api.status_code} error: {str(err)}')
             else:
                 logger.error(f'Error getting ConturAPI request: {response_contur_api.status_code} - {response_contur_api.headers}')
         return result_report
