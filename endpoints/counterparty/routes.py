@@ -60,16 +60,17 @@ async def counterparty_check(api_key: str,
                 del params['pdf']
             response_contur_api = requests.get(final_url, params=params)
             if response_contur_api.status_code == 200:
+                json_result = response_contur_api.json()[0]
                 if api_index == 0:
-                    result_report['BasicReport']['Информация'] = response_contur_api.json()[0]['UL']
+                    result_report['BasicReport']['Информация'] = json_result.get('UL')
                 if api_index == 1:
-                    result_report['BasicReport']['Телефоны'] = response_contur_api.json()[0]['contactPhones']['phones']
+                    result_report['BasicReport']['Телефоны'] = json_result.get('contactPhones').get('phones')
                 if api_index == 2:
-                    result_report['BasicReport']['Сайты'] = response_contur_api.json()[0]['sites']
+                    result_report['BasicReport']['Сайты'] = json_result.get('sites')
                 if api_index == 3:
-                    result_report['ExtendedReport_1'] = response_contur_api.json()[0]
+                    result_report['ExtendedReport_1'] = json_result
                 if api_index == 4:
-                    result_report['ExtendedReport_2'] = response_contur_api.json()[0]
+                    result_report['ExtendedReport_2'] = json_result
                 if api_index == 5:
                     result_report['BasicPDFReport'] = base64.b64encode(response_contur_api.content)
                 if api_index == 6:
