@@ -5,6 +5,7 @@ from fastapi import APIRouter, status, HTTPException
 import requests
 import traceback
 import json
+import base64
 
 
 router = APIRouter(
@@ -41,7 +42,7 @@ async def counterparty_check(api_key: str,
             params['inn'] = inn
         if ogrn:
             params['ogrn'] = ogrn
-        api_function_list = ['/req', '/contacts', '/sites', '/egrDetails', '/analytics']
+        api_function_list = ['/req', '/contacts', '/sites', '/egrDetails', '/analytics', '/briefReport', '/finan']
         result_report = {
             'BasicReport': {'Информация': '',
                             'Телефоны': '',
@@ -53,6 +54,10 @@ async def counterparty_check(api_key: str,
         }
         for api_index, api_function in enumerate(api_function_list):
             final_url = CONTUR_FOCUS_API_URL + CONTUR_FOCUS_API_VER + api_function
+            if api_index == 5:
+                params['pdf'] = ''
+            if api_index == 6:
+                del params['pdf']
             response_contur_api = requests.get(final_url, params=params)
             if response_contur_api.status_code == 200:
                 if api_index == 0:
@@ -65,6 +70,10 @@ async def counterparty_check(api_key: str,
                     result_report['ExtendedReport_1'] = response_contur_api.json()[0]
                 if api_index == 4:
                     result_report['ExtendedReport_2'] = response_contur_api.json()[0]
+                if api_index == 5:
+                    result_report['BasicPDFReport'] = base64.b64encode(response_contur_api.content)
+                if api_index == 6:
+                    result_report['FinPDFReport'] = base64.b64encode(response_contur_api.content)
             else:
                 logger.error(f'Error getting ConturAPI request: {response_contur_api.status_code} - {response_contur_api.headers}')
         return result_report
