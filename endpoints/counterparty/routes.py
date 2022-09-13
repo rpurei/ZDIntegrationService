@@ -42,7 +42,14 @@ async def counterparty_check(api_key: str,
             params['inn'] = inn
         if ogrn:
             params['ogrn'] = ogrn
-        api_function_list = ['/req', '/contacts', '/sites', '/egrDetails', '/analytics', '/briefReport', '/finan']
+        api_function_list = ['/req',
+                             '/contacts',
+                             '/sites',
+                             '/egrDetails',
+                             '/analytics',
+                             '/briefReport',
+                             '/finan',
+                             '/beneficialOwners']
         result_report = {
             'BasicReport': {'Информация': '',
                             'Телефоны': '',
@@ -50,7 +57,10 @@ async def counterparty_check(api_key: str,
             'ExtendedReport_1': '',
             'ExtendedReport_2': '',
             'SimpleReportPDF': '',
-            'FinReportPDF': ''
+            'FinReportPDF': '',
+            'BenefitiarsReport': {'Уставной капитал': '',
+                                  'Бенефициары': '',
+                                  'История бенефициаров': ''}
         }
         for api_index, api_function in enumerate(api_function_list):
             final_url = CONTUR_FOCUS_API_URL + CONTUR_FOCUS_API_VER + api_function
@@ -78,6 +88,10 @@ async def counterparty_check(api_key: str,
                         result_report['BasicPDFReport'] = base64.b64encode(response_contur_api.content)
                     if api_index == 6:
                         result_report['FinPDFReport'] = base64.b64encode(response_contur_api.content)
+                    if api_index == 7:
+                        result_report['BenefitiarsReport']['Уставной капитал'] = json_result.get('statedCapital')
+                        result_report['BenefitiarsReport']['Бенефициары'] = json_result.get('beneficialOwners')
+                        result_report['BenefitiarsReport']['История бенефициаров'] = json_result.get('historicalBeneficialOwners')
                 except (ValueError, json.JSONDecodeError) as err:
                     logger.error(f'Error getting ConturAPI data: {json_result} status code: {response_contur_api.status_code} error: {str(err)}')
             else:
