@@ -8,8 +8,3 @@ class ConturAPIGet(BaseModel):
     ogrn: Union[str, None] = None
     xml: bool = False
 
-    @validator('ogrn')
-    def check_inn_or_ogrn(cls, v, values):
-        if 'inn' not in values and not values['ogrn']:
-            raise ValueError('either a or b is required')
-        return values['ogrn']

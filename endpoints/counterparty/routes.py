@@ -1,11 +1,13 @@
 from app_logger import logger
 from typing import Union
-from config import CONTUR_FOCUS_API_URL, CONTUR_FOCUS_API_VER, CONTUR_FOCUS_API_KEY, API_KEY
+from config import CONTUR_FOCUS_API_URL, CONTUR_FOCUS_API_VER, CONTUR_FOCUS_API_KEY, API_KEY, FILES_DIR
 from fastapi import APIRouter, status, HTTPException
 import requests
 import traceback
 import json
 import base64
+from datetime import datetime
+from pathlib import Path
 
 
 router = APIRouter(
@@ -75,6 +77,8 @@ async def counterparty_check(api_key: str,
                     if api_index != 5 and api_index != 6 and response_contur_api.headers['content-type'].strip().startswith('application/json'):
                         json_result = response_contur_api.json()[0]
                     if api_index == 0:
+                        result_report['BasicReport']['ИНН'] = json_result.get('inn')
+                        result_report['BasicReport']['ОГРН'] = json_result.get('ogrn')
                         result_report['BasicReport']['Информация'] = json_result.get('UL')
                     if api_index == 1:
                         result_report['BasicReport']['Телефоны'] = json_result.get('contactPhones').get('phones')
@@ -86,6 +90,7 @@ async def counterparty_check(api_key: str,
                         result_report['ExtendedReport_2'] = json_result
                     if api_index == 5:
                         result_report['BasicPDFReport'] = base64.b64encode(response_contur_api.content)
+                        #report_file_name = Path(FILES_DIR) / f'{inn}-{datetime.now().strftime(("%d-%m-%Y-%H-%M-%S"))}.pdf'
                     if api_index == 6:
                         result_report['FinPDFReport'] = base64.b64encode(response_contur_api.content)
                     if api_index == 7:
