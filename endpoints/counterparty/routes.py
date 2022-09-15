@@ -1,6 +1,6 @@
 from app_logger import logger
 from typing import Union
-from config import CONTUR_FOCUS_API_URL, CONTUR_FOCUS_API_VER, CONTUR_FOCUS_API_KEY, API_KEY, FILES_DIR
+from config import CONTUR_FOCUS_API_URL, CONTUR_FOCUS_API_VER, CONTUR_FOCUS_API_KEY, API_KEY
 from fastapi import APIRouter, status, HTTPException
 import requests
 import traceback
@@ -51,18 +51,20 @@ async def counterparty_check(api_key: str,
                              '/analytics',
                              '/briefReport',
                              '/finan',
-                             '/beneficialOwners']
+                             '/beneficialOwners',
+                             '/excerpt']
         result_report = {
-            'BasicReport': {'Информация': '',
-                            'Телефоны': '',
-                            'Сайты': ''},
+            'BasicReport': {'Info': '',
+                            'Phones': '',
+                            'Sites': ''},
             'ExtendedReport_1': '',
             'ExtendedReport_2': '',
-            'SimpleReportPDF': '',
-            'FinReportPDF': '',
-            'BenefitiarsReport': {'Уставной капитал': '',
-                                  'Бенефициары': '',
-                                  'История бенефициаров': ''}
+            'BasicPDFReport': '',
+            'FinPDFReport': '',
+            'BenefitiarsReport': {'Capital': '',
+                                  'Benefitiars': '',
+                                  'Benefitiars history': ''},
+            'FNSPDFReport': ''
         }
         for api_index, api_function in enumerate(api_function_list):
             final_url = CONTUR_FOCUS_API_URL + CONTUR_FOCUS_API_VER + api_function
@@ -77,26 +79,27 @@ async def counterparty_check(api_key: str,
                     if api_index != 5 and api_index != 6 and response_contur_api.headers['content-type'].strip().startswith('application/json'):
                         json_result = response_contur_api.json()[0]
                     if api_index == 0:
-                        result_report['BasicReport']['ИНН'] = json_result.get('inn')
-                        result_report['BasicReport']['ОГРН'] = json_result.get('ogrn')
-                        result_report['BasicReport']['Информация'] = json_result.get('UL')
+                        result_report['BasicReport']['INN'] = json_result.get('inn')
+                        result_report['BasicReport']['OGRN'] = json_result.get('ogrn')
+                        result_report['BasicReport']['Info'] = json_result.get('UL')
                     if api_index == 1:
-                        result_report['BasicReport']['Телефоны'] = json_result.get('contactPhones').get('phones')
+                        result_report['BasicReport']['Phones'] = json_result.get('contactPhones').get('phones')
                     if api_index == 2:
-                        result_report['BasicReport']['Сайты'] = json_result.get('sites')
+                        result_report['BasicReport']['Sites'] = json_result.get('sites')
                     if api_index == 3:
                         result_report['ExtendedReport_1'] = json_result
                     if api_index == 4:
                         result_report['ExtendedReport_2'] = json_result
                     if api_index == 5:
                         result_report['BasicPDFReport'] = base64.b64encode(response_contur_api.content)
-                        #report_file_name = Path(FILES_DIR) / f'{inn}-{datetime.now().strftime(("%d-%m-%Y-%H-%M-%S"))}.pdf'
                     if api_index == 6:
                         result_report['FinPDFReport'] = base64.b64encode(response_contur_api.content)
                     if api_index == 7:
-                        result_report['BenefitiarsReport']['Уставной капитал'] = json_result.get('statedCapital')
-                        result_report['BenefitiarsReport']['Бенефициары'] = json_result.get('beneficialOwners')
-                        result_report['BenefitiarsReport']['История бенефициаров'] = json_result.get('historicalBeneficialOwners')
+                        result_report['BenefitiarsReport']['Capital'] = json_result.get('statedCapital')
+                        result_report['BenefitiarsReport']['Benefitiars'] = json_result.get('beneficialOwners')
+                        result_report['BenefitiarsReport']['Benefitiars history'] = json_result.get('historicalBeneficialOwners')
+                    if api_index == 8:
+                        result_report['FNSPDFReport'] = base64.b64encode(response_contur_api.content)
                 except (ValueError, json.JSONDecodeError) as err:
                     logger.error(f'Error getting ConturAPI data: {json_result} status code: {response_contur_api.status_code} error: {str(err)}')
             else:

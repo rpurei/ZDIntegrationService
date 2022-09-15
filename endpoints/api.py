@@ -9,4 +9,4 @@ router.include_router(counterpartycheck_router)
 
 @router.get('/')
 async def root():
-    return {'message': 'BarCodeProcesser service online!'}
+    return {'message': 'Integration service online!'}
