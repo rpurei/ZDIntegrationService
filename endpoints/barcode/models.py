@@ -13,3 +13,4 @@ class DocumentResponse(BaseModel):
     detail: str
     doc_content: str
     doc_ext: str
+    qr_image: str
