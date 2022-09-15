@@ -21,6 +21,7 @@ router = APIRouter(
 @router.post('/', status_code=status.HTTP_201_CREATED, response_model=DocumentResponse)
 async def add_category(input_document: Document):
     temp_qr_file = ''
+    temp_full_name = ''
     apikey_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail='API key not valid'
@@ -52,14 +53,17 @@ async def add_category(input_document: Document):
         else:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'Unsupported document type')
         doc_base64 = doc_to_base64(str(temp_full_name))
+        qr_base64 = doc_to_base64(str(temp_qr_file))
         if len(doc_base64) > 0:
             return {'detail': 'QR_INSERTED',
                     'doc_content': doc_base64,
-                    'doc_ext': input_document.doc_ext}
+                    'doc_ext': input_document.doc_ext,
+                    'qr_image': qr_base64}
     except Exception as err:
         lf = '\n'
         logger.error(f'{traceback.format_exc().replace(lf, "")}')
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f'{traceback.format_exc()}')
     finally:
         Path(temp_qr_file).unlink()
+        Path(temp_full_name).unlink()
 
