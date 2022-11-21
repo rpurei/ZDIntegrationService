@@ -101,7 +101,7 @@ async def counterparty_check(api_key: str,
                     if api_index == 8:
                         result_report['FNSPDFReport'] = base64.b64encode(response_contur_api.content)
                 except (ValueError, json.JSONDecodeError) as err:
-                    logger.error(f'Error getting ConturAPI data: {json_result} status code: {response_contur_api.status_code} error: {str(err)}')
+                    logger.error(f'Error getting ConturAPI data: {json_result} status code: {response_contur_api.status_code} error: {str(err)} URL: {final_url} parameters: {params}')
             else:
                 logger.error(f'Error getting ConturAPI request: {response_contur_api.status_code} - {response_contur_api.headers}')
         return result_report

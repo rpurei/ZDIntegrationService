@@ -15,8 +15,7 @@ headers = {'Username': DIRECTUM_API_USER,
 set_attachment_version_uri = (DIRECTUM_PROTOCOL +
                               DIRECTUM_URL +
                               DIRECTUM_API_URL +
-                              DIRECTUM_ATTACH_SET_URL
-                              )
+                              DIRECTUM_ATTACH_SET_URL)
 
 
 def doc_to_base64(file_name: str):

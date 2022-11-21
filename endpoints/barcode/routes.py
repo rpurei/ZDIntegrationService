@@ -42,11 +42,13 @@ async def add_category(input_document: Document):
         temp_qr_file = make_qr(input_document.doc_qr_text)
         if temp_qr_file == '':
             raise ValueError()
-        if input_document.doc_ext.startswith('doc'):
+        if input_document.doc_ext == 'docx':
             if add_doc_header_picture(str(temp_full_name), temp_qr_file) == -1:
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                     detail=f'Error document QR code inserting')
-        elif input_document.doc_ext.startswith('pdf'):
+        elif input_document.doc_ext == 'doc':
+            pass # convert to docx
+        elif input_document.doc_ext == 'pdf':
             if add_pdf_header_picture(str(temp_full_name), temp_qr_file) == -1:
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                                     detail=f'Error document QR code inserting')
